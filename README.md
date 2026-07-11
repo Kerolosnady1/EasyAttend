@@ -4,6 +4,20 @@ A smart, fast, and secure desktop application built with **C# Windows Forms** de
 
 ---
 
+## How to open the Application?
+
+* With CMD
+```bash
+./EasyAttend/bin/Debug/net10.0-windows/EasyAttend.exe
+
+```
+
+* With Windows
+> Click on **EasyAttend** Shortcut
+
+
+---
+
 ## ✨ Key Features
 
 * **📁 Direct Excel Integration:** Select the official attendance spreadsheet (`.xlsx`) via a file dialog and modify it directly using the lightweight `ClosedXML` library.
@@ -44,7 +58,7 @@ Open the project using Visual Studio.
 Install the required ClosedXML library using the NuGet Package Manager Console:
 
 	Install-Package ClosedXML
-
+```
 Build and run the application immediately!
 
 📝 Required Excel File Structure
