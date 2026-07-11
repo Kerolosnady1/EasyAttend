@@ -44,7 +44,7 @@ Open the project using Visual Studio.
 Install the required ClosedXML library using the NuGet Package Manager Console:
 
 	Install-Package ClosedXML
-```
+
 Build and run the application immediately!
 
 📝 Required Excel File Structure
