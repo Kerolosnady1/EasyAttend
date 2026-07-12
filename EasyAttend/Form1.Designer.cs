@@ -32,7 +32,10 @@
             dgvAttendance = new DataGridView();
             label1 = new Label();
             btnBrowse = new Button();
+<<<<<<< HEAD
             btnShowAbsentees = new Button();
+=======
+>>>>>>> 204786fb2ecee13d66435a21bf640d4bdd7791a6
             ((System.ComponentModel.ISupportInitialize)dgvAttendance).BeginInit();
             SuspendLayout();
             // 
@@ -69,7 +72,11 @@
             // 
             // btnBrowse
             // 
+<<<<<<< HEAD
             btnBrowse.Location = new Point(878, 81);
+=======
+            btnBrowse.Location = new Point(937, 77);
+>>>>>>> 204786fb2ecee13d66435a21bf640d4bdd7791a6
             btnBrowse.Name = "btnBrowse";
             btnBrowse.Size = new Size(140, 75);
             btnBrowse.TabIndex = 3;
@@ -77,6 +84,7 @@
             btnBrowse.UseVisualStyleBackColor = true;
             btnBrowse.Click += btnBrowse_Click;
             // 
+<<<<<<< HEAD
             // btnShowAbsentees
             // 
             btnShowAbsentees.Location = new Point(1038, 84);
@@ -87,12 +95,17 @@
             btnShowAbsentees.UseVisualStyleBackColor = true;
             btnShowAbsentees.Click += btnShowAbsentees_Click;
             // 
+=======
+>>>>>>> 204786fb2ecee13d66435a21bf640d4bdd7791a6
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1368, 746);
+<<<<<<< HEAD
             Controls.Add(btnShowAbsentees);
+=======
+>>>>>>> 204786fb2ecee13d66435a21bf640d4bdd7791a6
             Controls.Add(btnBrowse);
             Controls.Add(label1);
             Controls.Add(dgvAttendance);
@@ -110,6 +123,9 @@
         private DataGridView dgvAttendance;
         private Label label1;
         private Button btnBrowse;
+<<<<<<< HEAD
         private Button btnShowAbsentees;
+=======
+>>>>>>> 204786fb2ecee13d66435a21bf640d4bdd7791a6
     }
 }

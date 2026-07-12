@@ -5,7 +5,11 @@ using System.IO;
 using System.Windows.Forms;
 
 namespace EasyAttend
+<<<<<<< HEAD
 {
+=======
+{ 
+>>>>>>> 204786fb2ecee13d66435a21bf640d4bdd7791a6
     public partial class Form1 : Form
     {
         // متغير لحفظ مسار ملف الإكسيل المختار
@@ -183,6 +187,7 @@ namespace EasyAttend
                 MessageBox.Show($"حدث خطأ غير متوقع: {ex.Message}", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+<<<<<<< HEAD
 
         private void btnShowAbsentees_Click(object sender, EventArgs e)
         {
@@ -242,5 +247,7 @@ namespace EasyAttend
                 MessageBox.Show(reportMessage, "تقرير أرقام الغائبين اليوم", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
+=======
+>>>>>>> 204786fb2ecee13d66435a21bf640d4bdd7791a6
     }
 }
