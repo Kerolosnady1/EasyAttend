@@ -23,7 +23,4 @@ E:\C#\EasyAttend\EasyAttend\bin\Debug\net10.0-windows\RBush.dll
 E:\C#\EasyAttend\EasyAttend\bin\Debug\net10.0-windows\SixLabors.Fonts.dll
 E:\C#\EasyAttend\EasyAttend\obj\Debug\net10.0-windows\EasyAttend.csproj.AssemblyReference.cache
 E:\C#\EasyAttend\EasyAttend\obj\Debug\net10.0-windows\EasyAttend.csproj.Up2Date
-<<<<<<< HEAD
 E:\C#\EasyAttend\EasyAttend\obj\Debug\net10.0-windows\EasyAttend.sourcelink.json
-=======
->>>>>>> 204786fb2ecee13d66435a21bf640d4bdd7791a6

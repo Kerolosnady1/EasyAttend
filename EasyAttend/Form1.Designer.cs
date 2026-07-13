@@ -32,17 +32,17 @@
             dgvAttendance = new DataGridView();
             label1 = new Label();
             btnBrowse = new Button();
-<<<<<<< HEAD
             btnShowAbsentees = new Button();
-=======
->>>>>>> 204786fb2ecee13d66435a21bf640d4bdd7791a6
+            label2 = new Label();
+            txtSearch = new TextBox();
+            label3 = new Label();
             ((System.ComponentModel.ISupportInitialize)dgvAttendance).BeginInit();
             SuspendLayout();
             // 
             // txtStudentId
             // 
             txtStudentId.Font = new Font("Segoe UI", 19.8000011F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            txtStudentId.Location = new Point(506, 77);
+            txtStudentId.Location = new Point(513, 106);
             txtStudentId.Multiline = true;
             txtStudentId.Name = "txtStudentId";
             txtStudentId.Size = new Size(345, 79);
@@ -58,6 +58,7 @@
             dgvAttendance.RowHeadersWidth = 51;
             dgvAttendance.Size = new Size(1266, 495);
             dgvAttendance.TabIndex = 1;
+            dgvAttendance.CellDoubleClick += dgvAttendance_CellDoubleClick;
             // 
             // label1
             // 
@@ -72,11 +73,7 @@
             // 
             // btnBrowse
             // 
-<<<<<<< HEAD
-            btnBrowse.Location = new Point(878, 81);
-=======
-            btnBrowse.Location = new Point(937, 77);
->>>>>>> 204786fb2ecee13d66435a21bf640d4bdd7791a6
+            btnBrowse.Location = new Point(886, 106);
             btnBrowse.Name = "btnBrowse";
             btnBrowse.Size = new Size(140, 75);
             btnBrowse.TabIndex = 3;
@@ -84,28 +81,55 @@
             btnBrowse.UseVisualStyleBackColor = true;
             btnBrowse.Click += btnBrowse_Click;
             // 
-<<<<<<< HEAD
             // btnShowAbsentees
             // 
-            btnShowAbsentees.Location = new Point(1038, 84);
+            btnShowAbsentees.Location = new Point(1041, 106);
             btnShowAbsentees.Name = "btnShowAbsentees";
-            btnShowAbsentees.Size = new Size(143, 72);
+            btnShowAbsentees.Size = new Size(143, 75);
             btnShowAbsentees.TabIndex = 4;
             btnShowAbsentees.Text = "Absent";
             btnShowAbsentees.UseVisualStyleBackColor = true;
             btnShowAbsentees.Click += btnShowAbsentees_Click;
             // 
-=======
->>>>>>> 204786fb2ecee13d66435a21bf640d4bdd7791a6
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Font = new Font("Segoe UI", 18F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label2.Location = new Point(155, 126);
+            label2.Name = "label2";
+            label2.Size = new Size(352, 41);
+            label2.TabIndex = 5;
+            label2.Text = "Add By Serial Numbers:";
+            // 
+            // txtSearch
+            // 
+            txtSearch.Font = new Font("Segoe UI", 13.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            txtSearch.Location = new Point(396, 30);
+            txtSearch.Multiline = true;
+            txtSearch.Name = "txtSearch";
+            txtSearch.Size = new Size(563, 46);
+            txtSearch.TabIndex = 6;
+            txtSearch.TextChanged += txtSearch_TextChanged;
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Font = new Font("Segoe UI", 13.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label3.Location = new Point(32, 45);
+            label3.Name = "label3";
+            label3.Size = new Size(358, 31);
+            label3.TabIndex = 7;
+            label3.Text = "Search By Name/Serial Number:";
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1368, 746);
-<<<<<<< HEAD
+            Controls.Add(label3);
+            Controls.Add(txtSearch);
+            Controls.Add(label2);
             Controls.Add(btnShowAbsentees);
-=======
->>>>>>> 204786fb2ecee13d66435a21bf640d4bdd7791a6
             Controls.Add(btnBrowse);
             Controls.Add(label1);
             Controls.Add(dgvAttendance);
@@ -123,9 +147,9 @@
         private DataGridView dgvAttendance;
         private Label label1;
         private Button btnBrowse;
-<<<<<<< HEAD
         private Button btnShowAbsentees;
-=======
->>>>>>> 204786fb2ecee13d66435a21bf640d4bdd7791a6
+        private Label label2;
+        private TextBox txtSearch;
+        private Label label3;
     }
 }

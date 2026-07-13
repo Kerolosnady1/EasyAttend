@@ -5,11 +5,8 @@ using System.IO;
 using System.Windows.Forms;
 
 namespace EasyAttend
-<<<<<<< HEAD
 {
-=======
-{ 
->>>>>>> 204786fb2ecee13d66435a21bf640d4bdd7791a6
+
     public partial class Form1 : Form
     {
         // متغير لحفظ مسار ملف الإكسيل المختار
@@ -187,42 +184,38 @@ namespace EasyAttend
                 MessageBox.Show($"حدث خطأ غير متوقع: {ex.Message}", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-<<<<<<< HEAD
 
         private void btnShowAbsentees_Click(object sender, EventArgs e)
         {
-            // 1. التأكد إن الجدول فيه بيانات أصلاً ومختارين ملف
             if (dgvAttendance.Rows.Count == 0 || dgvAttendance.DataSource == null)
             {
                 MessageBox.Show("من فضلك اختر ملف الكشف واعرض البيانات أولاً!", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // 2. تحديد اسم عمود النهارده بناءً على التاريخ الحالي (مثل: 12/7)
             string todayDate = DateTime.Today.ToString("d/M");
 
-            // 3. التأكد إن عمود النهارده موجود في الجدول
             if (!dgvAttendance.Columns.Contains(todayDate))
             {
                 MessageBox.Show($"عمود تاريخ النهارده ({todayDate}) مش موجود في الجدول! هل قمت بتحضير أي طالب النهارده؟", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // لستة لتجميع أرقام الطلاب الغايبين
             System.Collections.Generic.List<string> absentIds = new System.Collections.Generic.List<string>();
+            int presentCount = 0; // متغيّر لحساب عدد الحاضرين
 
-            // 4. اللف على كل صفوف الطلاب في الـ DataGridView
             foreach (DataGridViewRow row in dgvAttendance.Rows)
             {
-                // تخطي الصف الفاضي الأخير لو موجود
                 if (row.IsNewRow) continue;
 
-                // قراءة القيمة اللي في عمود النهارده وقيمة عمود الـ "م"
                 var attendanceValue = row.Cells[todayDate].Value?.ToString()?.Trim();
                 var studentId = row.Cells["م"].Value?.ToString()?.Trim();
 
-                // لو الخانة فاضية أو مش مكتوب فيها "حاضر"، يبقى الطالب غايب
-                if (string.IsNullOrEmpty(attendanceValue) || attendanceValue != "حاضر")
+                if (attendanceValue == "حاضر")
+                {
+                    presentCount++; // زيادة الحاضرين بمقدار 1
+                }
+                else // لو غايب أو فاضي
                 {
                     if (!string.IsNullOrEmpty(studentId))
                     {
@@ -231,23 +224,122 @@ namespace EasyAttend
                 }
             }
 
-            // 5. عرض النتيجة في MessageBox
+            int totalStudents = presentCount + absentIds.Count; // إجمالي الطلاب الفعلي في الكشف
+
             if (absentIds.Count == 0)
             {
-                MessageBox.Show("الله ينور! مفيش ولا طالب غايب النهارده، الحضور كامل (207 بنادم). 🎉", "تقرير الغياب اليومي", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show($"الله ينور! الحضور كامل بنسبة 100% 🎉\n\n" +
+                                $"إجمالي الطلاب: {totalStudents}\n" +
+                                $"عدد الحاضرين: {presentCount}\n" +
+                                $"عدد الغائبين: 0",
+                                "تقرير الحضور والغياب اليومي", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-                // تجميع الأرقام وفصلها بفاصلة (مثال: 5, 12, 45, 102...)
                 string allAbsentIds = string.Join(", ", absentIds);
 
-                string reportMessage = $"إجمالي عدد الغائبين النهارده: {absentIds.Count} طالب.\n\n" +
-                                       $"أرقام المسلسل (م) للغائبين هي:\n{allAbsentIds}";
+                string reportMessage = $"📊 تقرير الحضور والغياب لليوم ({todayDate}):\n" +
+                                       $"--------------------------------------------\n" +
+                                       $"👤 إجمالي الطلاب في الكشف: {totalStudents}\n" +
+                                       $"✅ إجمالي الحاضرين: {presentCount}\n" +
+                                       $"❌ إجمالي الغائبين: {absentIds.Count}\n\n" +
+                                       $"📌 أرقام المسلسل (م) للغائبين هي:\n{allAbsentIds}";
 
-                MessageBox.Show(reportMessage, "تقرير أرقام الغائبين اليوم", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(reportMessage, "تقرير الحضور والغياب اليومي", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
-=======
->>>>>>> 204786fb2ecee13d66435a21bf640d4bdd7791a6
+
+        private void RemoveAttendance(string studentId)
+        {
+            try
+            {
+                using (var workbook = new XLWorkbook(excelFilePath))
+                {
+                    var worksheet = workbook.Worksheet(1);
+                    string todayDate = DateTime.Today.ToString("d/M");
+                    int targetColumn = -1;
+                    int totalColumns = worksheet.LastColumnUsed().ColumnNumber();
+
+                    for (int col = 3; col <= totalColumns; col++)
+                    {
+                        if (worksheet.Cell(1, col).Value.ToString().Trim() == todayDate)
+                        {
+                            targetColumn = col;
+                            break;
+                        }
+                    }
+
+                    if (targetColumn == -1) return; // مفيش عمود للنهارده أصلاً
+
+                    int totalRows = worksheet.LastRowUsed().RowNumber();
+                    for (int row = 2; row <= totalRows; row++)
+                    {
+                        if (worksheet.Cell(row, 1).Value.ToString().Trim() == studentId)
+                        {
+                            // مسح كلمة "حاضر" من الإكسيل
+                            worksheet.Cell(row, targetColumn).Value = "";
+                            workbook.Save();
+                            RefreshDataGridView(); // تحديث الجدول فوراً
+                            MessageBox.Show("تم إلغاء حضور الطالب بنجاح وتم تأديبه! 🫡", "تم الإلغاء");
+                            break;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"خطأ أثناء إلغاء الحضور: {ex.Message}");
+            }
+        }
+
+        private void dgvAttendance_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            // التأكد إن الضغطة مش على صف العناوين
+            if (e.RowIndex < 0) return;
+
+            var row = dgvAttendance.Rows[e.RowIndex];
+            string studentId = row.Cells["م"].Value?.ToString();
+            string studentName = row.Cells["اسم الطالب (رباعــــي)"].Value?.ToString();
+            string todayDate = DateTime.Today.ToString("d/M");
+
+            if (string.IsNullOrEmpty(studentId)) return;
+
+            // التأكد إن الطالب أصلاً متحضر النهارده قبل ما نلغي
+            var attendanceStatus = row.Cells[todayDate].Value?.ToString();
+            if (attendanceStatus != "حاضر")
+            {
+                MessageBox.Show("الطالب ده مش متحضر النهارده أصلاً عشان تلغي حضوره!", "تنبيه");
+                return;
+            }
+
+            var confirmResult = MessageBox.Show($"هل أنت متأكد من إلغاء حضور الطالب: {studentName} (رقم م: {studentId}) للشرر والمشاغبة؟",
+                                                 "إلغاء تحضير طالب",
+                                                 MessageBoxButtons.YesNo,
+                                                 MessageBoxIcon.Question);
+
+            if (confirmResult == DialogResult.Yes)
+            {
+                RemoveAttendance(studentId); // دالة بتمسح القيمة من الإكسيل (هكتبهالك تحت)
+            }
+        }
+
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            // التأكد إن الـ DataGridView مربوطة بـ DataTable
+            if (dgvAttendance.DataSource is DataTable dt)
+            {
+                string filterText = txtSearch.Text.Trim().Replace("'", "''"); // لحماية الكود من الرموز الخاصة
+
+                if (string.IsNullOrEmpty(filterText))
+                {
+                    dt.DefaultView.RowFilter = ""; // إلغاء الفلتر وعرض الكل لو الخانة فاضية
+                }
+                else
+                {
+                    // فلترة ذكية: تبحث في عمود "م" بالرقم، أو في عمود الاسم بأي جزء من الكلمة
+                    dt.DefaultView.RowFilter = $"[م] = '{filterText}' OR [اسم الطالب (رباعــــي)] LIKE '%{filterText}%'";
+                }
+            }
+        }
     }
 }
