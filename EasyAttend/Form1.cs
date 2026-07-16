@@ -6,7 +6,6 @@ using System.Windows.Forms;
 
 namespace EasyAttend
 {
-
     public partial class Form1 : Form
     {
         // متغير لحفظ مسار ملف الإكسيل المختار
@@ -15,8 +14,11 @@ namespace EasyAttend
         public Form1()
         {
             InitializeComponent();
-            // تفعيل الـ KeyDown للـ TextBox برمجياً لو مش مفعلها من التصميم
-            txtStudentId.KeyDown += txtStudentId_KeyDown;
+
+            // ربط الأحداث برمجياً للتأكد من عملها بكفاءة
+            txtSmartSearchAndAttend.TextChanged += txtSmartSearchAndAttend_TextChanged;
+            txtSmartSearchAndAttend.KeyDown += txtSmartSearchAndAttend_KeyDown;
+            dgvAttendance.CellDoubleClick += dgvAttendance_CellDoubleClick;
         }
 
         // 1. زرار اختيار ملف الإكسيل وعرضه فوراً في الـ DataGrid
@@ -85,15 +87,40 @@ namespace EasyAttend
             }
         }
 
-        // 3. حدث الضغط على Enter داخل الـ TextBox للتحضير السريع
-        private void txtStudentId_KeyDown(object sender, KeyEventArgs e)
+        // 3. الفلترة الذكية الفورية أثناء الكتابة في الـ TextBox (بحث بالاسم أو الرقم م)
+        private void txtSmartSearchAndAttend_TextChanged(object sender, EventArgs e)
+        {
+            if (dgvAttendance.DataSource is DataTable dt)
+            {
+                string filterText = txtSmartSearchAndAttend.Text.Trim().Replace("'", "''");
+
+                if (string.IsNullOrEmpty(filterText))
+                {
+                    dt.DefaultView.RowFilter = ""; // لو الخانة فاضية يعرض كل الطلاب تلقائياً
+                }
+                else
+                {
+                    // لو المدخل أرقام فقط هيفلتر بالـ م، لو حروف هيفلتر بالاسم لتجنب الـ Crash
+                    int temp;
+                    if (int.TryParse(filterText, out temp))
+                    {
+                        dt.DefaultView.RowFilter = $"[م] = {temp}";
+                    }
+                    else
+                    {
+                        dt.DefaultView.RowFilter = $"[اسم الطالب (رباعــــي)] LIKE '%{filterText}%'";
+                    }
+                }
+            }
+        }
+
+        // 4. حدث الضغط على Enter داخل الـ TextBox للتحضير السريع للطالب المفلتر
+        private void txtSmartSearchAndAttend_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
                 // منع صوت الويندوز المزعج عند ضغط Enter
                 e.SuppressKeyPress = true;
-
-                string inputId = txtStudentId.Text.Trim();
 
                 if (string.IsNullOrEmpty(excelFilePath))
                 {
@@ -101,18 +128,37 @@ namespace EasyAttend
                     return;
                 }
 
-                if (string.IsNullOrEmpty(inputId)) return;
+                // التأكد إن الجدول معروض فيه طلاب نتيجة الفلترة
+                if (dgvAttendance.Rows.Count > 0 && dgvAttendance.Rows[0].Cells["م"].Value != null)
+                {
+                    // قراءة بيانات أول طالب ظاهر قدامك في التصفية
+                    string studentId = dgvAttendance.Rows[0].Cells["م"].Value.ToString().Trim();
+                    string studentName = dgvAttendance.Rows[0].Cells["اسم الطالب (رباعــــي)"].Value.ToString().Trim();
 
-                // استدعاء دالة التحضير والكتابة في الملف
-                MarkAttendance(inputId);
+                    // تأكيد بصري سريع بالاسم قبل الـ Save لضمان الهوية
+                    var confirm = MessageBox.Show($"هل تريد تحضير الطالب:\n\n👤 {studentName}\n🔢 رقم مسلسل (م): {studentId}؟",
+                                                  "تأكيد تحضير سريع",
+                                                  MessageBoxButtons.YesNo,
+                                                  MessageBoxIcon.Question);
 
-                // مسح التكست بوكس وتجهيزه للطالب التالي فوراً
-                txtStudentId.Clear();
-                txtStudentId.Focus();
+                    if (confirm == DialogResult.Yes)
+                    {
+                        // استدعاء دالة التحضير والكتابة في الملف
+                        MarkAttendance(studentId);
+
+                        // مسح التكست بوكس وتجهيزه للطالب التالي فوراً (وهنا الجدول هيرجع يعرض الكل تلقائياً)
+                        txtSmartSearchAndAttend.Clear();
+                        txtSmartSearchAndAttend.Focus();
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("لم يتم العثور على أي طالب بهذا الاسم أو الرقم!", "خطأ في البحث", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
-        // 4. دالة التحضير الذكي والكتابة في الإكسيل
+        // 5. دالة التحضير الذكي والكتابة في ملف الإكسيل
         private void MarkAttendance(string studentId)
         {
             try
@@ -153,15 +199,13 @@ namespace EasyAttend
                     {
                         if (worksheet.Cell(row, 1).Value.ToString().Trim() == studentId)
                         {
-                            // تسجيل الحضور بـ "حاضر" أو علامة صح
+                            // تسجيل الحضور بـ "حاضر"
                             worksheet.Cell(row, targetColumn).Value = "حاضر";
-
-                            string studentName = worksheet.Cell(row, 2).Value.ToString();
 
                             // حفظ الملف فوراً
                             workbook.Save();
 
-                            // تحديث الشاشة والجدول تلقائياً بدون الحاجة لإعادة اختيار الملف
+                            // تحديث الشاشة والجدول تلقائياً
                             RefreshDataGridView();
 
                             studentFound = true;
@@ -185,6 +229,7 @@ namespace EasyAttend
             }
         }
 
+        // 6. زرار إظهار تقرير الغياب والحضور الإجمالي اليومي
         private void btnShowAbsentees_Click(object sender, EventArgs e)
         {
             if (dgvAttendance.Rows.Count == 0 || dgvAttendance.DataSource == null)
@@ -202,7 +247,7 @@ namespace EasyAttend
             }
 
             System.Collections.Generic.List<string> absentIds = new System.Collections.Generic.List<string>();
-            int presentCount = 0; // متغيّر لحساب عدد الحاضرين
+            int presentCount = 0;
 
             foreach (DataGridViewRow row in dgvAttendance.Rows)
             {
@@ -213,9 +258,9 @@ namespace EasyAttend
 
                 if (attendanceValue == "حاضر")
                 {
-                    presentCount++; // زيادة الحاضرين بمقدار 1
+                    presentCount++;
                 }
-                else // لو غايب أو فاضي
+                else
                 {
                     if (!string.IsNullOrEmpty(studentId))
                     {
@@ -224,7 +269,7 @@ namespace EasyAttend
                 }
             }
 
-            int totalStudents = presentCount + absentIds.Count; // إجمالي الطلاب الفعلي في الكشف
+            int totalStudents = presentCount + absentIds.Count;
 
             if (absentIds.Count == 0)
             {
@@ -249,6 +294,7 @@ namespace EasyAttend
             }
         }
 
+        // 7. دالة إلغاء الحضور (تُستدعى عند الرغبة في حذف "حاضر" لطالب مشاغب)
         private void RemoveAttendance(string studentId)
         {
             try
@@ -269,16 +315,17 @@ namespace EasyAttend
                         }
                     }
 
-                    if (targetColumn == -1) return; // مفيش عمود للنهارده أصلاً
+                    if (targetColumn == -1) return;
 
                     int totalRows = worksheet.LastRowUsed().RowNumber();
                     for (int row = 2; row <= totalRows; row++)
                     {
                         if (worksheet.Cell(row, 1).Value.ToString().Trim() == studentId)
                         {
-                            // مسح كلمة "حاضر" من الإكسيل
+                            // مسح كلمة "حاضر" من الإكسيل ليعود غائباً
                             worksheet.Cell(row, targetColumn).Value = "";
                             workbook.Save();
+
                             RefreshDataGridView(); // تحديث الجدول فوراً
                             MessageBox.Show("تم إلغاء حضور الطالب بنجاح وتم تأديبه! 🫡", "تم الإلغاء");
                             break;
@@ -292,10 +339,10 @@ namespace EasyAttend
             }
         }
 
+        // 8. حدث النقر المزدوج (Double-Click) لإلغاء حضور الطلاب المشاغبين فوراً من الجدول
         private void dgvAttendance_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            // التأكد إن الضغطة مش على صف العناوين
-            if (e.RowIndex < 0) return;
+            if (e.RowIndex < 0) return; // تخطي صف العناوين
 
             var row = dgvAttendance.Rows[e.RowIndex];
             string studentId = row.Cells["م"].Value?.ToString();
@@ -304,41 +351,22 @@ namespace EasyAttend
 
             if (string.IsNullOrEmpty(studentId)) return;
 
-            // التأكد إن الطالب أصلاً متحضر النهارده قبل ما نلغي
+            // التأكد إن الطالب أصلاً متحضر النهارده قبل الإلغاء
             var attendanceStatus = row.Cells[todayDate].Value?.ToString();
             if (attendanceStatus != "حاضر")
             {
-                MessageBox.Show("الطالب ده مش متحضر النهارده أصلاً عشان تلغي حضوره!", "تنبيه");
+                MessageBox.Show("الطالب ده مش متحضر النهارده أصلاً عشان تلغي حضوره!", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            var confirmResult = MessageBox.Show($"هل أنت متأكد من إلغاء حضور الطالب: {studentName} (رقم م: {studentId}) للشرر والمشاغبة؟",
+            var confirmResult = MessageBox.Show($"هل أنت متأكد من إلغاء حضور الطالب:\n\n👤 {studentName} (رقم م: {studentId}) للشرر والمشاغبة؟",
                                                  "إلغاء تحضير طالب",
                                                  MessageBoxButtons.YesNo,
                                                  MessageBoxIcon.Question);
 
             if (confirmResult == DialogResult.Yes)
             {
-                RemoveAttendance(studentId); // دالة بتمسح القيمة من الإكسيل (هكتبهالك تحت)
-            }
-        }
-
-        private void txtSearch_TextChanged(object sender, EventArgs e)
-        {
-            // التأكد إن الـ DataGridView مربوطة بـ DataTable
-            if (dgvAttendance.DataSource is DataTable dt)
-            {
-                string filterText = txtSearch.Text.Trim().Replace("'", "''"); // لحماية الكود من الرموز الخاصة
-
-                if (string.IsNullOrEmpty(filterText))
-                {
-                    dt.DefaultView.RowFilter = ""; // إلغاء الفلتر وعرض الكل لو الخانة فاضية
-                }
-                else
-                {
-                    // فلترة ذكية: تبحث في عمود "م" بالرقم، أو في عمود الاسم بأي جزء من الكلمة
-                    dt.DefaultView.RowFilter = $"[م] = '{filterText}' OR [اسم الطالب (رباعــــي)] LIKE '%{filterText}%'";
-                }
+                RemoveAttendance(studentId);
             }
         }
     }

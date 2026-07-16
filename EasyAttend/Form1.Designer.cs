@@ -28,40 +28,39 @@
         /// </summary>
         private void InitializeComponent()
         {
-            txtStudentId = new TextBox();
+            txtSmartSearchAndAttend = new TextBox();
             dgvAttendance = new DataGridView();
             label1 = new Label();
             btnBrowse = new Button();
             btnShowAbsentees = new Button();
             label2 = new Label();
-            txtSearch = new TextBox();
-            label3 = new Label();
             ((System.ComponentModel.ISupportInitialize)dgvAttendance).BeginInit();
             SuspendLayout();
             // 
-            // txtStudentId
+            // txtSmartSearchAndAttend
             // 
-            txtStudentId.Font = new Font("Segoe UI", 19.8000011F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            txtStudentId.Location = new Point(513, 106);
-            txtStudentId.Multiline = true;
-            txtStudentId.Name = "txtStudentId";
-            txtStudentId.Size = new Size(345, 79);
-            txtStudentId.TabIndex = 0;
-            txtStudentId.TextAlign = HorizontalAlignment.Center;
-            txtStudentId.KeyDown += txtStudentId_KeyDown;
+            txtSmartSearchAndAttend.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            txtSmartSearchAndAttend.Font = new Font("Segoe UI", 19.8000011F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            txtSmartSearchAndAttend.Location = new Point(251, 78);
+            txtSmartSearchAndAttend.Multiline = true;
+            txtSmartSearchAndAttend.Name = "txtSmartSearchAndAttend";
+            txtSmartSearchAndAttend.Size = new Size(617, 79);
+            txtSmartSearchAndAttend.TabIndex = 0;
+            txtSmartSearchAndAttend.TextAlign = HorizontalAlignment.Center;
             // 
             // dgvAttendance
             // 
+            dgvAttendance.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             dgvAttendance.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvAttendance.Location = new Point(40, 191);
             dgvAttendance.Name = "dgvAttendance";
             dgvAttendance.RowHeadersWidth = 51;
             dgvAttendance.Size = new Size(1266, 495);
             dgvAttendance.TabIndex = 1;
-            dgvAttendance.CellDoubleClick += dgvAttendance_CellDoubleClick;
             // 
             // label1
             // 
+            label1.Anchor = AnchorStyles.Bottom;
             label1.AutoSize = true;
             label1.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label1.ForeColor = SystemColors.Highlight;
@@ -73,7 +72,8 @@
             // 
             // btnBrowse
             // 
-            btnBrowse.Location = new Point(886, 106);
+            btnBrowse.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnBrowse.Location = new Point(920, 78);
             btnBrowse.Name = "btnBrowse";
             btnBrowse.Size = new Size(140, 75);
             btnBrowse.TabIndex = 3;
@@ -83,7 +83,8 @@
             // 
             // btnShowAbsentees
             // 
-            btnShowAbsentees.Location = new Point(1041, 106);
+            btnShowAbsentees.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnShowAbsentees.Location = new Point(1075, 78);
             btnShowAbsentees.Name = "btnShowAbsentees";
             btnShowAbsentees.Size = new Size(143, 75);
             btnShowAbsentees.TabIndex = 4;
@@ -95,45 +96,23 @@
             // 
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI", 18F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label2.Location = new Point(155, 126);
+            label2.Location = new Point(267, 34);
             label2.Name = "label2";
-            label2.Size = new Size(352, 41);
+            label2.Size = new Size(554, 41);
             label2.TabIndex = 5;
-            label2.Text = "Add By Serial Numbers:";
-            // 
-            // txtSearch
-            // 
-            txtSearch.Font = new Font("Segoe UI", 13.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            txtSearch.Location = new Point(396, 30);
-            txtSearch.Multiline = true;
-            txtSearch.Name = "txtSearch";
-            txtSearch.Size = new Size(563, 46);
-            txtSearch.TabIndex = 6;
-            txtSearch.TextChanged += txtSearch_TextChanged;
-            // 
-            // label3
-            // 
-            label3.AutoSize = true;
-            label3.Font = new Font("Segoe UI", 13.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label3.Location = new Point(32, 45);
-            label3.Name = "label3";
-            label3.Size = new Size(358, 31);
-            label3.TabIndex = 7;
-            label3.Text = "Search By Name/Serial Number:";
+            label2.Text = "Add/Search By Serial Numbers/Name:";
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1368, 746);
-            Controls.Add(label3);
-            Controls.Add(txtSearch);
             Controls.Add(label2);
             Controls.Add(btnShowAbsentees);
             Controls.Add(btnBrowse);
             Controls.Add(label1);
             Controls.Add(dgvAttendance);
-            Controls.Add(txtStudentId);
+            Controls.Add(txtSmartSearchAndAttend);
             Name = "Form1";
             Text = "Easy Attend";
             ((System.ComponentModel.ISupportInitialize)dgvAttendance).EndInit();
@@ -142,14 +121,11 @@
         }
 
         #endregion
-
-        private TextBox txtStudentId;
         private DataGridView dgvAttendance;
         private Label label1;
         private Button btnBrowse;
         private Button btnShowAbsentees;
         private Label label2;
-        private TextBox txtSearch;
-        private Label label3;
+        private TextBox txtSmartSearchAndAttend;
     }
 }

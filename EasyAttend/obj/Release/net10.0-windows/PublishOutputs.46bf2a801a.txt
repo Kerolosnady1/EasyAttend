@@ -1,0 +1,12 @@
+E:\C#\EasyAttend\EasyAttend\bin\Release\net10.0-windows\publish\EasyAttend.exe
+E:\C#\EasyAttend\EasyAttend\bin\Release\net10.0-windows\publish\EasyAttend.dll
+E:\C#\EasyAttend\EasyAttend\bin\Release\net10.0-windows\publish\EasyAttend.deps.json
+E:\C#\EasyAttend\EasyAttend\bin\Release\net10.0-windows\publish\EasyAttend.runtimeconfig.json
+E:\C#\EasyAttend\EasyAttend\bin\Release\net10.0-windows\publish\EasyAttend.pdb
+E:\C#\EasyAttend\EasyAttend\bin\Release\net10.0-windows\publish\ClosedXML.dll
+E:\C#\EasyAttend\EasyAttend\bin\Release\net10.0-windows\publish\ClosedXML.Parser.dll
+E:\C#\EasyAttend\EasyAttend\bin\Release\net10.0-windows\publish\DocumentFormat.OpenXml.dll
+E:\C#\EasyAttend\EasyAttend\bin\Release\net10.0-windows\publish\DocumentFormat.OpenXml.Framework.dll
+E:\C#\EasyAttend\EasyAttend\bin\Release\net10.0-windows\publish\ExcelNumberFormat.dll
+E:\C#\EasyAttend\EasyAttend\bin\Release\net10.0-windows\publish\RBush.dll
+E:\C#\EasyAttend\EasyAttend\bin\Release\net10.0-windows\publish\SixLabors.Fonts.dll
