@@ -1,27 +1,34 @@
 using ClosedXML.Excel;
 using System;
 using System.Data;
+using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace EasyAttend
 {
     public partial class Form1 : Form
     {
-        // متغير لحفظ مسار ملف الإكسيل المختار
         private string excelFilePath = "";
+        // متغير لمنع تشغيل حدث التغيير TextChanged أثناء مسح التكست بوكس تلقائياً
+        private bool isClearing = false;
 
         public Form1()
         {
             InitializeComponent();
 
-            // ربط الأحداث برمجياً للتأكد من عملها بكفاءة
+            // ربط الأحداث برمجياً للتأكد من عملها بكفاءة وثبات
             txtSmartSearchAndAttend.TextChanged += txtSmartSearchAndAttend_TextChanged;
             txtSmartSearchAndAttend.KeyDown += txtSmartSearchAndAttend_KeyDown;
             dgvAttendance.CellDoubleClick += dgvAttendance_CellDoubleClick;
+
+            // تظبيط شكل خانة التاريخ عشان تظهر بنفس شكل أعمدة الإكسيل (يوم/شهر)
+            dtpAttendanceDate.Format = DateTimePickerFormat.Custom;
+            dtpAttendanceDate.CustomFormat = "d/M";
         }
 
-        // 1. زرار اختيار ملف الإكسيل وعرضه فوراً في الـ DataGrid
+        // 1. زرار اختيار ملف الإكسيل وعرضه في الـ DataGridView
         private void btnBrowse_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
@@ -32,14 +39,12 @@ namespace EasyAttend
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     excelFilePath = openFileDialog.FileName;
-
-                    // تحديث الجدول وعرض البيانات فوراً
                     RefreshDataGridView();
                 }
             }
         }
 
-        // 2. دالة لقراءة الإكسيل وتحويله لـ DataTable لعرضه في الـ DataGridView
+        // 2. دالة قراءة ملف الإكسيل وتحديث الـ DataGridView
         private void RefreshDataGridView()
         {
             if (string.IsNullOrEmpty(excelFilePath) || !File.Exists(excelFilePath)) return;
@@ -51,34 +56,47 @@ namespace EasyAttend
                     var worksheet = workbook.Worksheet(1);
                     DataTable dt = new DataTable();
 
-                    // قراءة العناوين (الصف الأول) وإنشاء الأعمدة في الـ DataTable
                     var firstRow = worksheet.FirstRowUsed();
                     foreach (var cell in firstRow.Cells())
                     {
                         dt.Columns.Add(cell.Value.ToString().Trim());
                     }
 
-                    // قراءة صفوف الطلاب
+                    // تأكيد وجود عمود الملاحظات في الـ DataTable
+                    if (!dt.Columns.Contains("ملاحظات"))
+                    {
+                        dt.Columns.Add("ملاحظات");
+                    }
+
                     var rows = worksheet.RowsUsed();
                     bool isFirstRow = true;
                     foreach (var row in rows)
                     {
-                        if (isFirstRow) { isFirstRow = false; continue; } // تخطي صف العناوين
+                        if (isFirstRow) { isFirstRow = false; continue; }
 
                         DataRow dr = dt.NewRow();
                         for (int i = 0; i < dt.Columns.Count; i++)
                         {
-                            dr[i] = row.Cell(i + 1).Value.ToString();
+                            var cell = row.Cell(i + 1);
+
+                            if (cell.IsEmpty())
+                            {
+                                dr[i] = "";
+                            }
+                            else
+                            {
+                                dr[i] = cell.Value.ToString().Trim();
+                            }
                         }
                         dt.Rows.Add(dr);
                     }
 
-                    // ربط الـ DataTable بالـ DataGridView
                     dgvAttendance.DataSource = dt;
-
-                    // تظبيط شكل الجدول ليظهر بشكل احترافي عربي
                     dgvAttendance.RightToLeft = RightToLeft.Yes;
                     dgvAttendance.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+
+                    // تلوين الصفوف تلقائياً بعد التحميل
+                    ApplyRowColoring();
                 }
             }
             catch (Exception ex)
@@ -87,20 +105,51 @@ namespace EasyAttend
             }
         }
 
-        // 3. الفلترة الذكية الفورية أثناء الكتابة في الـ TextBox (بحث بالاسم أو الرقم م)
+        // 3. دالة تلوين الصفوف السحرية (مستأذن بالأصفر، مشاغب بالأحمر)
+        private void ApplyRowColoring()
+        {
+            foreach (DataGridViewRow row in dgvAttendance.Rows)
+            {
+                if (row.IsNewRow) continue;
+
+                if (dgvAttendance.Columns.Contains("ملاحظات"))
+                {
+                    string note = row.Cells["ملاحظات"].Value?.ToString()?.Trim() ?? "";
+
+                    if (note.Contains("مستأذن"))
+                    {
+                        row.DefaultCellStyle.BackColor = Color.LightYellow; // أصفر هادئ
+                        row.DefaultCellStyle.ForeColor = Color.Black;
+                    }
+                    else if (note.Contains("مشاغب") || note.Contains("ساقط") || note.Contains("تأديب"))
+                    {
+                        row.DefaultCellStyle.BackColor = Color.MistyRose; // أحمر وردي خفيف
+                        row.DefaultCellStyle.ForeColor = Color.DarkRed;
+                    }
+                    else
+                    {
+                        row.DefaultCellStyle.BackColor = Color.White;
+                        row.DefaultCellStyle.ForeColor = Color.Black;
+                    }
+                }
+            }
+        }
+
+        // 4. الفلترة الفورية أثناء الكتابة في الـ TextBox
         private void txtSmartSearchAndAttend_TextChanged(object sender, EventArgs e)
         {
+            if (isClearing) return; // لو بننظف التكست بوكس برمجياً بنوقف الفلترة مؤقتاً لتجنب التهنيج
+
             if (dgvAttendance.DataSource is DataTable dt)
             {
                 string filterText = txtSmartSearchAndAttend.Text.Trim().Replace("'", "''");
 
                 if (string.IsNullOrEmpty(filterText))
                 {
-                    dt.DefaultView.RowFilter = ""; // لو الخانة فاضية يعرض كل الطلاب تلقائياً
+                    dt.DefaultView.RowFilter = "";
                 }
                 else
                 {
-                    // لو المدخل أرقام فقط هيفلتر بالـ م، لو حروف هيفلتر بالاسم لتجنب الـ Crash
                     int temp;
                     if (int.TryParse(filterText, out temp))
                     {
@@ -111,16 +160,17 @@ namespace EasyAttend
                         dt.DefaultView.RowFilter = $"[اسم الطالب (رباعــــي)] LIKE '%{filterText}%'";
                     }
                 }
+                ApplyRowColoring(); // إعادة تلوين الصفوف المفلترة
             }
         }
 
-        // 4. حدث الضغط على Enter داخل الـ TextBox للتحضير السريع للطالب المفلتر
+        // 5. زر الـ Enter الذكي: يحضر الطالب في التاريخ المختار بـ dtpAttendanceDate 🌟
         private void txtSmartSearchAndAttend_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
-                // منع صوت الويندوز المزعج عند ضغط Enter
-                e.SuppressKeyPress = true;
+                e.SuppressKeyPress = true; // منع صوت الويندوز المزعج
+                e.Handled = true;          // منع إضافة سطر جديد داخل التكست بوكس الـ Multiline 🔴
 
                 if (string.IsNullOrEmpty(excelFilePath))
                 {
@@ -128,26 +178,40 @@ namespace EasyAttend
                     return;
                 }
 
-                // التأكد إن الجدول معروض فيه طلاب نتيجة الفلترة
+                string inputText = txtSmartSearchAndAttend.Text.Trim();
+                if (string.IsNullOrEmpty(inputText)) return;
+
                 if (dgvAttendance.Rows.Count > 0 && dgvAttendance.Rows[0].Cells["م"].Value != null)
                 {
-                    // قراءة بيانات أول طالب ظاهر قدامك في التصفية
                     string studentId = dgvAttendance.Rows[0].Cells["م"].Value.ToString().Trim();
                     string studentName = dgvAttendance.Rows[0].Cells["اسم الطالب (رباعــــي)"].Value.ToString().Trim();
 
-                    // تأكيد بصري سريع بالاسم قبل الـ Save لضمان الهوية
-                    var confirm = MessageBox.Show($"هل تريد تحضير الطالب:\n\n👤 {studentName}\n🔢 رقم مسلسل (م): {studentId}؟",
-                                                  "تأكيد تحضير سريع",
+                    // قراءة التاريخ المختار من خانة التاريخ الذكية 📅
+                    DateTime selectedDate = dtpAttendanceDate.Value;
+                    string formattedDate = selectedDate.ToString("d/M");
+
+                    var confirm = MessageBox.Show($"هل تريد تحضير الطالب:\n\n👤 {studentName}\n🔢 رقم مسلسل (م): {studentId}\n📅 في تاريخ: {formattedDate}؟",
+                                                  "تأكيد تحضير",
                                                   MessageBoxButtons.YesNo,
                                                   MessageBoxIcon.Question);
 
                     if (confirm == DialogResult.Yes)
                     {
-                        // استدعاء دالة التحضير والكتابة في الملف
-                        MarkAttendance(studentId);
-
-                        // مسح التكست بوكس وتجهيزه للطالب التالي فوراً (وهنا الجدول هيرجع يعرض الكل تلقائياً)
+                        // 1. تفعيل وضع الـ Clearing لإلغاء تداخل الـ TextChanged فوراً قبل المسح
+                        isClearing = true;
                         txtSmartSearchAndAttend.Clear();
+                        isClearing = false;
+
+                        // 2. إلغاء الفلترة برمجياً ليعود الجدول كاملاً قبل عملية الحفظ والتحميل لضمان ثبات الـ UI
+                        if (dgvAttendance.DataSource is DataTable dt)
+                        {
+                            dt.DefaultView.RowFilter = "";
+                        }
+
+                        // 3. تحديث ملف الإكسيل بالتاريخ المختار وحفظه وإعادة تحميل الـ DataGridView
+                        UpdateStudentStatus(studentId, "حاضر", "", selectedDate);
+
+                        // 4. إعادة التركيز للتكست بوكس للطالب التالي
                         txtSmartSearchAndAttend.Focus();
                     }
                 }
@@ -158,66 +222,67 @@ namespace EasyAttend
             }
         }
 
-        // 5. دالة التحضير الذكي والكتابة في ملف الإكسيل
-        private void MarkAttendance(string studentId)
+        // 6. دالة موحدة لتحديث حالة الطالب لـ أي تاريخ نحدده (بشكل مرن جداً 📅)
+        private void UpdateStudentStatus(string studentId, string attendanceValue, string notesValue, DateTime targetDate)
         {
             try
             {
                 using (var workbook = new XLWorkbook(excelFilePath))
                 {
                     var worksheet = workbook.Worksheet(1);
-
-                    // الحصول على تاريخ النهارده بصيغة يوم/شهر (مثال: 11/7)
-                    string todayDate = DateTime.Today.ToString("d/M");
-
-                    int targetColumn = -1;
+                    string formattedDate = targetDate.ToString("d/M"); // هيطلع "16/7" أو "14/7" مثلاً
                     int totalColumns = worksheet.LastColumnUsed().ColumnNumber();
 
-                    // البحث عن عمود النهارده في الصف الأول
-                    for (int col = 3; col <= totalColumns; col++)
+                    int notesColumn = -1;
+                    int targetDateColumn = -1;
+
+                    // البحث عن عمود الملاحظات وعمود التاريخ المطلوب
+                    for (int col = 1; col <= totalColumns; col++)
                     {
-                        if (worksheet.Cell(1, col).Value.ToString().Trim() == todayDate)
-                        {
-                            targetColumn = col;
-                            break;
-                        }
+                        string header = worksheet.Cell(1, col).Value.ToString().Trim();
+                        if (header == "ملاحظات") notesColumn = col;
+                        if (header == formattedDate) targetDateColumn = col;
                     }
 
-                    // لو مش موجود، بنعمل عمود جديد للنهارده قبل عمود الملحوظات
-                    if (targetColumn == -1)
+                    // لو عمود الملاحظات مش موجود ننشئه في الآخر
+                    if (notesColumn == -1)
                     {
-                        targetColumn = totalColumns; // عمود الملحوظات هيترحّل خطوة
-                        worksheet.Column(targetColumn).InsertColumnsBefore(1);
-                        worksheet.Cell(1, targetColumn).Value = todayDate;
+                        notesColumn = totalColumns + 1;
+                        worksheet.Cell(1, notesColumn).Value = "ملاحظات";
                     }
 
-                    // البحث عن الطالب بالرقم (عمود "م" وهو العمود رقم 1)
+                    // لو العمود بتاع التاريخ المستهدف مش موجود ننشئه قبل عمود الملاحظات علطول
+                    if (targetDateColumn == -1 && attendanceValue != null)
+                    {
+                        targetDateColumn = notesColumn;
+                        worksheet.Column(targetDateColumn).InsertColumnsBefore(1);
+                        worksheet.Cell(1, targetDateColumn).Value = formattedDate;
+                        notesColumn++; // بنرحل عمود الملاحظات خطوة لليمين لأننا حشرنا عمود قبله
+                    }
+
                     int totalRows = worksheet.LastRowUsed().RowNumber();
-                    bool studentFound = false;
-
                     for (int row = 2; row <= totalRows; row++)
                     {
                         if (worksheet.Cell(row, 1).Value.ToString().Trim() == studentId)
                         {
-                            // تسجيل الحضور بـ "حاضر"
-                            worksheet.Cell(row, targetColumn).Value = "حاضر";
+                            if (attendanceValue != null && targetDateColumn != -1)
+                            {
+                                worksheet.Cell(row, targetDateColumn).Value = attendanceValue;
+                            }
 
-                            // حفظ الملف فوراً
+                            if (notesValue != null)
+                            {
+                                worksheet.Cell(row, notesColumn).Value = notesValue;
+                            }
+
                             workbook.Save();
-
-                            // تحديث الشاشة والجدول تلقائياً
-                            RefreshDataGridView();
-
-                            studentFound = true;
                             break;
                         }
                     }
-
-                    if (!studentFound)
-                    {
-                        MessageBox.Show($"الرقم ({studentId}) مش موجود في الكشف!", "خطأ في الإدخال", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
                 }
+
+                // نعيد تحميل الـ DataGridView تماماً بعد الحفظ لتنعكس التعديلات فوراً
+                RefreshDataGridView();
             }
             catch (IOException)
             {
@@ -225,11 +290,52 @@ namespace EasyAttend
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"حدث خطأ غير متوقع: {ex.Message}", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"حدث خطأ: {ex.Message}", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // 6. زرار إظهار تقرير الغياب والحضور الإجمالي اليومي
+        // 7. النقر المزدوج (Double-Click) لتسجيل الحالات الخاصة بالتاريخ المختار أيضاً 🌟
+        private void dgvAttendance_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                var row = dgvAttendance.Rows[e.RowIndex];
+                string studentId = row.Cells["م"].Value?.ToString();
+                string studentName = row.Cells["اسم الطالب (رباعــــي)"].Value?.ToString();
+
+                if (string.IsNullOrEmpty(studentId)) return;
+
+                DateTime selectedDate = dtpAttendanceDate.Value;
+                string formattedDate = selectedDate.ToString("d/M");
+
+                ContextMenuStrip menu = new ContextMenuStrip();
+
+                ToolStripMenuItem titleItem = new ToolStripMenuItem($"خيارات الطالب: {studentName} (تاريخ: {formattedDate})");
+                titleItem.Enabled = false;
+                menu.Items.Add(titleItem);
+                menu.Items.Add(new ToolStripSeparator());
+
+                menu.Items.Add($"✅ تسجيل حضور (حاضر يوم {formattedDate})", null, (s, ev) => {
+                    UpdateStudentStatus(studentId, "حاضر", "", selectedDate);
+                });
+
+                menu.Items.Add($"🟡 طالب مستأذن يوم {formattedDate}", null, (s, ev) => {
+                    UpdateStudentStatus(studentId, "مستأذن", "مستأذن بعذر رسمي", selectedDate);
+                });
+
+                menu.Items.Add($"🔴 طالب مشاغب يوم {formattedDate}", null, (s, ev) => {
+                    UpdateStudentStatus(studentId, "غائب", "مشاغب - توصية رسوب ⚠️", selectedDate);
+                });
+
+                menu.Items.Add($"🔄 إلغاء حضور يوم {formattedDate}", null, (s, ev) => {
+                    UpdateStudentStatus(studentId, "", "", selectedDate);
+                });
+
+                menu.Show(Cursor.Position);
+            }
+        }
+
+        // 8. زرار عرض إجمالي الغياب وتقرير الحضور اليومي
         private void btnShowAbsentees_Click(object sender, EventArgs e)
         {
             if (dgvAttendance.Rows.Count == 0 || dgvAttendance.DataSource == null)
@@ -238,11 +344,12 @@ namespace EasyAttend
                 return;
             }
 
-            string todayDate = DateTime.Today.ToString("d/M");
+            // التقرير هيطلع بناءً على التاريخ المختار في الأداة لتسهيل المراجعة لأي يوم فات 📅
+            string selectedDateStr = dtpAttendanceDate.Value.ToString("d/M");
 
-            if (!dgvAttendance.Columns.Contains(todayDate))
+            if (!dgvAttendance.Columns.Contains(selectedDateStr))
             {
-                MessageBox.Show($"عمود تاريخ النهارده ({todayDate}) مش موجود في الجدول! هل قمت بتحضير أي طالب النهارده؟", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"عمود التاريخ المختار ({selectedDateStr}) مش موجود في الجدول! هل قمت بتحضير أي طالب فيه؟", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -253,7 +360,7 @@ namespace EasyAttend
             {
                 if (row.IsNewRow) continue;
 
-                var attendanceValue = row.Cells[todayDate].Value?.ToString()?.Trim();
+                var attendanceValue = row.Cells[selectedDateStr].Value?.ToString()?.Trim();
                 var studentId = row.Cells["م"].Value?.ToString()?.Trim();
 
                 if (attendanceValue == "حاضر")
@@ -273,100 +380,24 @@ namespace EasyAttend
 
             if (absentIds.Count == 0)
             {
-                MessageBox.Show($"الله ينور! الحضور كامل بنسبة 100% 🎉\n\n" +
+                MessageBox.Show($"الله ينور! الحضور كامل بنسبة 100% يوم {selectedDateStr} 🎉\n\n" +
                                 $"إجمالي الطلاب: {totalStudents}\n" +
                                 $"عدد الحاضرين: {presentCount}\n" +
                                 $"عدد الغائبين: 0",
-                                "تقرير الحضور والغياب اليومي", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                "تقرير الحضور والغياب", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
                 string allAbsentIds = string.Join(", ", absentIds);
 
-                string reportMessage = $"📊 تقرير الحضور والغياب لليوم ({todayDate}):\n" +
+                string reportMessage = $"📊 تقرير الحضور والغياب ليوم ({selectedDateStr}):\n" +
                                        $"--------------------------------------------\n" +
                                        $"👤 إجمالي الطلاب في الكشف: {totalStudents}\n" +
                                        $"✅ إجمالي الحاضرين: {presentCount}\n" +
                                        $"❌ إجمالي الغائبين: {absentIds.Count}\n\n" +
                                        $"📌 أرقام المسلسل (م) للغائبين هي:\n{allAbsentIds}";
 
-                MessageBox.Show(reportMessage, "تقرير الحضور والغياب اليومي", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-        }
-
-        // 7. دالة إلغاء الحضور (تُستدعى عند الرغبة في حذف "حاضر" لطالب مشاغب)
-        private void RemoveAttendance(string studentId)
-        {
-            try
-            {
-                using (var workbook = new XLWorkbook(excelFilePath))
-                {
-                    var worksheet = workbook.Worksheet(1);
-                    string todayDate = DateTime.Today.ToString("d/M");
-                    int targetColumn = -1;
-                    int totalColumns = worksheet.LastColumnUsed().ColumnNumber();
-
-                    for (int col = 3; col <= totalColumns; col++)
-                    {
-                        if (worksheet.Cell(1, col).Value.ToString().Trim() == todayDate)
-                        {
-                            targetColumn = col;
-                            break;
-                        }
-                    }
-
-                    if (targetColumn == -1) return;
-
-                    int totalRows = worksheet.LastRowUsed().RowNumber();
-                    for (int row = 2; row <= totalRows; row++)
-                    {
-                        if (worksheet.Cell(row, 1).Value.ToString().Trim() == studentId)
-                        {
-                            // مسح كلمة "حاضر" من الإكسيل ليعود غائباً
-                            worksheet.Cell(row, targetColumn).Value = "";
-                            workbook.Save();
-
-                            RefreshDataGridView(); // تحديث الجدول فوراً
-                            MessageBox.Show("تم إلغاء حضور الطالب بنجاح وتم تأديبه! 🫡", "تم الإلغاء");
-                            break;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"خطأ أثناء إلغاء الحضور: {ex.Message}");
-            }
-        }
-
-        // 8. حدث النقر المزدوج (Double-Click) لإلغاء حضور الطلاب المشاغبين فوراً من الجدول
-        private void dgvAttendance_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex < 0) return; // تخطي صف العناوين
-
-            var row = dgvAttendance.Rows[e.RowIndex];
-            string studentId = row.Cells["م"].Value?.ToString();
-            string studentName = row.Cells["اسم الطالب (رباعــــي)"].Value?.ToString();
-            string todayDate = DateTime.Today.ToString("d/M");
-
-            if (string.IsNullOrEmpty(studentId)) return;
-
-            // التأكد إن الطالب أصلاً متحضر النهارده قبل الإلغاء
-            var attendanceStatus = row.Cells[todayDate].Value?.ToString();
-            if (attendanceStatus != "حاضر")
-            {
-                MessageBox.Show("الطالب ده مش متحضر النهارده أصلاً عشان تلغي حضوره!", "تنبيه", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            var confirmResult = MessageBox.Show($"هل أنت متأكد من إلغاء حضور الطالب:\n\n👤 {studentName} (رقم م: {studentId}) للشرر والمشاغبة؟",
-                                                 "إلغاء تحضير طالب",
-                                                 MessageBoxButtons.YesNo,
-                                                 MessageBoxIcon.Question);
-
-            if (confirmResult == DialogResult.Yes)
-            {
-                RemoveAttendance(studentId);
+                MessageBox.Show(reportMessage, "تقرير الحضور والغياب", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
     }

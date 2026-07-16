@@ -1,75 +1,75 @@
-# 🎖️ Military Attendance Kiosk System
+# 📊 EasyAttend - Smart Attendance Management System
 
-A smart, fast, and secure desktop application built with **C# Windows Forms** designed to manage and register student attendance for military training courses in universities. The application directly reads and updates data in real-time within the Brigadier General's **Excel** file without requiring a complex database setup, cutting down traditional roll-call time from hours to just a few minutes! ⏱️
+**EasyAttend** is a lightweight, high-performance C# Windows Forms desktop application designed to make managing and tracking student attendance incredibly fast and automated. Integrated directly with Excel files using **ClosedXML**, it serves as an ideal solution for instructors, university coordinators, and administrators.
 
----
-
-## How to open the Application?
-
-* With CMD
-```bash
-./EasyAttend/bin/Debug/net10.0-windows/EasyAttend.exe
-
-```
-
-* With Windows
-> Click on **EasyAttend** Shortcut
-
+[**English Version**](#key-features) | [**النسخة العربية**](#الميزات-الرئيسية)
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-* **📁 Direct Excel Integration:** Select the official attendance spreadsheet (`.xlsx`) via a file dialog and modify it directly using the lightweight `ClosedXML` library.
-* **🚫 Anti-Cheating Mechanism:** Designed around physical ID collection at the registration desk. Students cannot log attendance for absent peers since the original ID card must be handed over physically.
-* **⚡ Ultra-Fast Entry:** Simply type the student's serial number (`m`) and press **Enter**. The application automatically marks them present, saves the file, and clears the input box for the next student in under a second!
-* **🔄 Live Dashboard:** A real-time `DataGridView` instantly reflects attendance updates across all 15 days as soon as a student is logged.
-* **📅 Smart Date Detection:** The system automatically detects the current system date (e.g., `11/7`) and matches it with the corresponding column header in Excel to mark the student as "**Present**" (حاضر).
-* **💾 Auto-Save:** The application automatically saves changes to the Excel file after every single entry, ensuring zero data loss if the computer loses power or encounters an unexpected shutdown.
-
----
-
-## 🛠️ Technologies Used
-
-* **Language:** C#
-* **Application Type:** Windows Forms App (.NET Framework / .NET Core)
-* **Excel Manipulation:** `ClosedXML` library installed via NuGet Package Manager.
-* **Data Binder:** `DataTable` to bridge the Excel sheet and the DataGridView smoothly.
+*   **⚡ Smart Instant Search & Attend:** Enter a student’s serial number (`م`) or type their name, press **Enter**, and they are instantly marked as "Present".
+*   **📅 Dynamic Date Column Generation:** If a column for the selected date (e.g., `16/7`) doesn't exist in your Excel sheet, the app automatically creates it before marking attendance.
+*   **⏳ Flexible Past-Date Logging:** Easily select any previous date from the interactive `DateTimePicker` to log or edit past attendance in seconds.
+*   **🎨 Conditional Row Coloring:** Smart UI feedback that highlights special cases instantly:
+    *   🟡 **Yellow:** Authorized absence / excused (`مستأذن`).
+    *   🔴 **Red:** Rowdy / disciplinary action (`مشاغب` / `تأديب`).
+*   **🖱️ Double-Click Context Menu:** Right-click or double-click on any student row to assign special notes or reset their status without touching the keyboard.
+*   **📊 Instant Absence Reports:** Generates a real-time summary report for any selected date showing: total students, present count, absent count, and a list of all absent serial numbers.
+*   **🔒 Error & Conflict Handling:** Built-in protection against file-sharing violations (e.g., when the Excel sheet is open in Microsoft Excel) to prevent data loss.
 
 ---
 
-## 📸 UI & Workflow
+## الميزات الرئيسية (Arabic)
 
-1. **Step 1:** Click the **"Browse"** button to locate and select the Brigadier General's Excel sheet.
-2. **Step 2:** The grid view instantly populates with the student roster and the 15-day columns.
-3. **Step 3:** The administrator collects student IDs inside the lecture hall, inputs the student's serial number (`m`), and hits **Enter**.
-4. **Step 4:** The word "**حاضر**" appears instantly under the current date column, and the file saves in the background.
+*   **⚡ بحث وتحضير ذكي وسريع:** بمجرد كتابة رقم الطالب (م) أو جزء من اسمه والضغط على **Enter**، يتم تسجيله "حاضر" فوراً.
+*   **📅 إنشاء تلقائي لأعمدة التواريخ:** إذا كان تاريخ اليوم غير موجود في ملف الإكسيل، يقوم البرنامج بإنشاء العمود ديناميكياً وحفظ البيانات فيه.
+*   **⏳ تحضير مرن لتواريخ سابقة:** يمكنك اختيار أي تاريخ سابق من خانة التاريخ الذكية لتحضير الطلاب أو تعديل غيابهم بسهولة.
+*   **🎨 تلوين ذكي وتلقائي للجدول:** تمييز بصري فوري للطلاب حسب حالاتهم الخاصة:
+    *   🟡 **الأصفر:** طالب مستأذن بعذر رسمي.
+    *   🔴 **الأحمر الوردي:** طالب مشاغب أو عليه عقوبة تأديبية.
+*   **🖱️ قائمة خيارات سريعة بالـ Double-Click:** اضغط مرتين على أي طالب لفتح قائمة الخيارات الخاصة (تسجيل حضور، إذن، غياب تأديبي، أو تصفير الحالة).
+*   **📊 تقارير غياب فورية بنقرة واحدة:** يعرض تقريراً تفصيلياً لأي يوم يوضح إجمالي الحاضرين، الغائبين، وقائمة بأرقام مسلسل الغائبين لسهولة نقلها.
 
 ---
 
-## 🚀 Setup & Installation
+## Tech Stack
 
-1. Clone the repository to your local machine:
-   ```bash
-	git clone [https://github.com/YOUR_USERNAME/REPOSITORY_NAME.git](https://github.com/YOUR_USERNAME/REPOSITORY_NAME.git)
+*   **Language:** C# (.NET Framework)
+*   **UI Framework:** Windows Forms (WinForms)
+*   **Database/Storage:** Excel Spreadsheet (`.xlsx`)
+*   **Libraries used:** 
+    *   [ClosedXML](https://github.com/ClosedXML/ClosedXML) (for robust and fast Excel file manipulation without needing MS Office installed).
 
-Open the project using Visual Studio.
+---
 
-Install the required ClosedXML library using the NuGet Package Manager Console:
+## How to Run & Use the Project
 
-	Install-Package ClosedXML
-```
-Build and run the application immediately!
+1.  **Clone the repository:**
+    ```bash
+    git clone [https://github.com/your-username/EasyAttend.git](https://github.com/your-username/EasyAttend.git)
+    ```
+2.  **Restore Nuget Packages:** Make sure `ClosedXML` and its dependencies are installed via Nuget Package Manager.
+3.  **Run the Application:** Build and run using Visual Studio.
+4.  **How to use:**
+    *   Click **Browse** (`اختر كشف العسكرية`) and select your Excel sheet.
+    *   To record today's attendance, keep the date picker as is, search for the student, and hit **Enter**.
+    *   To record attendance for a past date, change the date in the picker, search for the student, and hit **Enter**.
+    *   Double-click on any row to open the advanced options.
 
-📝 Required Excel File Structure
-For the application to function perfectly out of the box, the Excel file layout must be formatted as follows (configured Right-to-Left for Arabic data):
+---
 
-Column A: Titled "م" (Contains the student's serial or identification number).
+## Project Structure (MVC-like WinForms)
 
-Column B: Titled "اسم الطالب" (Student Name).
+*   `Form1.cs`: Contains the UI event listeners, validation logic, and the smart rendering engine.
+*   `Form1.Designer.cs`: Declarations of GUI controls including `dgvAttendance`, `txtSmartSearchAndAttend`, and `dtpAttendanceDate`.
+*   `Program.cs`: The main entry point of the application.
 
-Subsequent Columns (C to Q): Header names must represent the course dates (e.g., 11/7, 12/7, 13/7, etc.).
+---
 
-The Last Column: Titled "ملحوظات" (Notes).
+## License
 
-⚙️ Developed & Maintained by: Kerolos Nady - Computer Science Student.
+This project is licensed under the MIT License - feel free to use and modify it!
+
+---
+*Created with ❤️ by [Kerolos](https://github.com/your-username)*

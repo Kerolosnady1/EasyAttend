@@ -34,6 +34,7 @@
             btnBrowse = new Button();
             btnShowAbsentees = new Button();
             label2 = new Label();
+            dtpAttendanceDate = new DateTimePicker();
             ((System.ComponentModel.ISupportInitialize)dgvAttendance).BeginInit();
             SuspendLayout();
             // 
@@ -47,6 +48,8 @@
             txtSmartSearchAndAttend.Size = new Size(617, 79);
             txtSmartSearchAndAttend.TabIndex = 0;
             txtSmartSearchAndAttend.TextAlign = HorizontalAlignment.Center;
+            txtSmartSearchAndAttend.TextChanged += txtSmartSearchAndAttend_TextChanged;
+            txtSmartSearchAndAttend.KeyDown += txtSmartSearchAndAttend_KeyDown;
             // 
             // dgvAttendance
             // 
@@ -57,6 +60,7 @@
             dgvAttendance.RowHeadersWidth = 51;
             dgvAttendance.Size = new Size(1266, 495);
             dgvAttendance.TabIndex = 1;
+            dgvAttendance.CellDoubleClick += dgvAttendance_CellDoubleClick;
             // 
             // label1
             // 
@@ -102,11 +106,21 @@
             label2.TabIndex = 5;
             label2.Text = "Add/Search By Serial Numbers/Name:";
             // 
+            // dtpAttendanceDate
+            // 
+            dtpAttendanceDate.CustomFormat = "d/M";
+            dtpAttendanceDate.Format = DateTimePickerFormat.Custom;
+            dtpAttendanceDate.Location = new Point(776, 158);
+            dtpAttendanceDate.Name = "dtpAttendanceDate";
+            dtpAttendanceDate.Size = new Size(92, 27);
+            dtpAttendanceDate.TabIndex = 6;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1368, 746);
+            Controls.Add(dtpAttendanceDate);
             Controls.Add(label2);
             Controls.Add(btnShowAbsentees);
             Controls.Add(btnBrowse);
@@ -127,5 +141,6 @@
         private Button btnShowAbsentees;
         private Label label2;
         private TextBox txtSmartSearchAndAttend;
+        private DateTimePicker dtpAttendanceDate;
     }
 }
