@@ -26,6 +26,19 @@ namespace EasyAttend
             // تظبيط شكل خانة التاريخ عشان تظهر بنفس شكل أعمدة الإكسيل (يوم/شهر)
             dtpAttendanceDate.Format = DateTimePickerFormat.Custom;
             dtpAttendanceDate.CustomFormat = "d/M";
+
+            picWhatsApp.Click += picWhatsApp_Click;
+            picLinkedIn.Click += picLinkedIn_Click;
+            picGitHub.Click += picGitHub_Click;
+            picInstagram.Click += picInstagram_Click;
+            picFacebook.Click += picFacebook_Click;
+
+            // 👆 تغيير شكل الماوس ليد (Hand) عند الوقوف على أي أيقونة
+            picWhatsApp.Cursor = Cursors.Hand;
+            picLinkedIn.Cursor = Cursors.Hand;
+            picGitHub.Cursor = Cursors.Hand;
+            picInstagram.Cursor = Cursors.Hand;
+            picFacebook.Cursor = Cursors.Hand;
         }
 
         // 1. زرار اختيار ملف الإكسيل وعرضه في الـ DataGridView
@@ -315,19 +328,23 @@ namespace EasyAttend
                 menu.Items.Add(titleItem);
                 menu.Items.Add(new ToolStripSeparator());
 
-                menu.Items.Add($"✅ تسجيل حضور (حاضر يوم {formattedDate})", null, (s, ev) => {
+                menu.Items.Add($"✅ تسجيل حضور (حاضر يوم {formattedDate})", null, (s, ev) =>
+                {
                     UpdateStudentStatus(studentId, "حاضر", "", selectedDate);
                 });
 
-                menu.Items.Add($"🟡 طالب مستأذن يوم {formattedDate}", null, (s, ev) => {
+                menu.Items.Add($"🟡 طالب مستأذن يوم {formattedDate}", null, (s, ev) =>
+                {
                     UpdateStudentStatus(studentId, "مستأذن", "مستأذن بعذر رسمي", selectedDate);
                 });
 
-                menu.Items.Add($"🔴 طالب مشاغب يوم {formattedDate}", null, (s, ev) => {
+                menu.Items.Add($"🔴 طالب مشاغب يوم {formattedDate}", null, (s, ev) =>
+                {
                     UpdateStudentStatus(studentId, "غائب", "مشاغب - توصية رسوب ⚠️", selectedDate);
                 });
 
-                menu.Items.Add($"🔄 إلغاء حضور يوم {formattedDate}", null, (s, ev) => {
+                menu.Items.Add($"🔄 إلغاء حضور يوم {formattedDate}", null, (s, ev) =>
+                {
                     UpdateStudentStatus(studentId, "", "", selectedDate);
                 });
 
@@ -399,6 +416,55 @@ namespace EasyAttend
 
                 MessageBox.Show(reportMessage, "تقرير الحضور والغياب", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
+        }
+
+        private void picWhatsApp_Click(object sender, EventArgs e)
+        {
+            // استبدل الرقم برقمك مع كود الدولة من غير (+) أو أصفار في الأول (مثال لمصر: 201012345678)
+            string phoneNumber = "201120731769";
+            string message = Uri.EscapeDataString("أهلاً كيرلس، أحتاج إلى استفسار/دعم بشأن برنامج EasyAttend.");
+            OpenUrl($"https://wa.me/{phoneNumber}?text={message}");
+        }
+
+        private void picLinkedIn_Click(object sender, EventArgs e)
+        {
+            OpenUrl("https://www.linkedin.com/in/kerolos-farag-3a8378311");
+        }
+
+        private void picGitHub_Click(object sender, EventArgs e)
+        {
+            OpenUrl("https://github.com/Kerolosnady1");
+        }
+
+        private void picInstagram_Click(object sender, EventArgs e)
+        {
+            OpenUrl("https://www.instagram.com/_kerolosnady_");
+        }
+
+        private void picFacebook_Click(object sender, EventArgs e)
+        {
+            OpenUrl("https://www.facebook.com/kerolos.nady.96");
+        }
+
+        private void OpenUrl(string url)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"تعذر فتح الرابط: {ex.Message}", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void flowLayoutPanel1_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }
